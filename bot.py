@@ -1,30 +1,47 @@
-GROUPME_API = "https://api.groupme.com/v3/"
-ACCESS_TOK = "sWNFUhEiTLajKC9R3rnEblOx13o1yc5anbCqswp3"
+import requests, json, time
+
+GROUPME_API = "https://api.groupme.com/v3"
+BOT_API = "https://api.groupme.com/v3/bots/post"
 
 class AnnouncementBot(object):
 
-	def __init__(self, token, bot_id, contacts, message_filter=None, base_guid='announcement-bot'):
-		self.token = token
-		self.bot_id = bot_id
-		self.contacts = contacts
-		self.base_guid = base_guid
-		self.message_filter = message_filter
+    def __init__(self, token, bot_id, contacts, base_guid='announcement-bot'):
+        self.token = token
+        self.bot_id = bot_id
+        self.contacts = contacts
+        self.base_guid = base_guid
 
-	def send_announcement(self, message):
-		if not self.message_filter(message):
-			for contact in self.contacts:
-				json = {
-					'message': {
-						'source_guid': '{}-{}-{}'.format(self.base_guid, contact, time.time()),
-						'recipient_id': contact,
-						'text': 'From {}:\n{}'.format(message['name'], message['text'])
-					}
-				}
+    def send_announcement(self, message):
 
-				requests.post(GROUPME_API + '/direct_messages', params={'token': self.token}, json=json)
+        ok_results = err_results = 0
 
-			# json = {
-			# 	'bot_id': self.bot_id,
-			# 	'text': 'Message sent to {} recipients.'.format(len(self.contacts))
-			# }
-			# requests.post(GROUPME_API + '/bots/post', params={'token': self.token}, json=json)
+        for contact in self.contacts:
+
+            # Notifying contacts
+            msg = {
+            	'message': {
+            		'source_guid': '{}-{}-{}'.format(self.base_guid, contact, time.time()),
+            		'recipient_id': contact,
+            		'text': 'From {}:\n{}'.format(message['name'], message['text'])
+            	}
+            }
+
+            res = requests.post(GROUPME_API + '/direct_messages', params={'token': self.token}, json=msg)
+
+            if res.status_code == 201: ok_results += 1
+            else: err_results += 1
+
+        # Sending report to control group
+        report = "Message succesfully sent to {} recipients. ".format(ok_results)
+
+        if err_results:
+            report += "WARNING {} errors. Your message might not have been delivered to all contacts.".format(err_results)
+        else:
+            report += "No errors."
+
+        msg = {
+        	'bot_id': self.bot_id,
+        	'text': report
+        }
+
+        requests.post(BOT_API, params={'token': self.token}, json = msg)

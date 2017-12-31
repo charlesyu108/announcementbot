@@ -26,8 +26,7 @@ def hello():
         "text" : "You've just been beezed!"
         }}
 
-        res = requests.post("https://api.groupme.com/v3/direct_messages", json = message, params = {"token": ACCESS_TOK})
-        print res.url
+        requests.post("https://api.groupme.com/v3/direct_messages", json = message, params = {"token": ACCESS_TOK})
 
         print 'response from server: ', res.text
 
