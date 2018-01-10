@@ -33,8 +33,7 @@ def index():
     return "AnnouncementBot 2.0"
 
 @app.route("/contacts", methods = ["GET"])
-def contacts():
-
+def viewContacts():
     contact_string = " "
     for c in contacts:
         contact_string += (c + "\n")
