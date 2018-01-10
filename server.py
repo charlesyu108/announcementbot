@@ -34,7 +34,10 @@ def index():
 
 @app.route("/contacts", methods = ["GET"])
 def contacts():
-    contact_string = reduce(lambda acc,x: acc+"\n"+x, contacts, "")
+
+    contact_string = " "
+    for c in contacts:
+        contact_string += (c + "\n")
     return "Current contact ID's: \n {}".format(contact_string)
 
 @app.route("/listen", methods = ["POST"])
