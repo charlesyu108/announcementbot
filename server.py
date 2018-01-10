@@ -22,11 +22,11 @@ contacts = contactLoader.load_contacts()
 bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
 updater = ContactUpdater(APP_REDIRECT)
 
-@app.route("/hi", methods = ["GET"])
-def hello():
-    return "Hello"
+@app.route("/", methods = ["GET"])
+def index():
+    return "AnnouncementBot 2.0"
 
-@app.route("/", methods = ["POST"])
+@app.route("/listen", methods = ["POST"])
 def onMessage():
     message = json.loads(request.data)
     if message['sender_type'] != 'bot':
@@ -34,11 +34,11 @@ def onMessage():
 
     return "OK"
 
-@app.route("/authenticate", methods = ["GET"])
+@app.route("/reseed", methods = ["GET"])
 def authenticate():
     return redirect(updater.authenticate())
 
-@app.route("/authenticate_result", methods = ["GET"])
+@app.route("/reseed/authenticate_result", methods = ["GET"])
 def auth_approved():
     u_auth_tok = request.args.get("access_token")
     if not u_auth_tok:
@@ -47,7 +47,7 @@ def auth_approved():
 
     return render_template("update.html", groups = groups)
 
-@app.route("/select_group",  methods = ["POST"])
+@app.route("/reseed/select_group",  methods = ["POST"])
 def select():
     members = json.loads(request.form["members"])
     try:
