@@ -32,6 +32,11 @@ def reload_contacts():
 def index():
     return "AnnouncementBot 2.0"
 
+@app.route("/contacts", methods = ["GET"])
+def index():
+    contact_string = reduce(lambda acc,x: acc+"\n"+x, contacts, "")
+    return "Current contact ID's: \n {}".format(contact_string)
+
 @app.route("/listen", methods = ["POST"])
 def onMessage():
     message = json.loads(request.data)
