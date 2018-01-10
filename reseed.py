@@ -16,7 +16,9 @@ class ContactUpdater(object):
         data = [
             {
                 "name": group["name"],
-                "member_ids_json": json.dumps([mem["user_id"] for mem in group["members"]]),
+                "member_json": json.dumps(
+                    [ {"user_id": mem["user_id"], "name": mem["nickname"] }
+                    for mem in group["members"] ]),
                 "members": [mem["nickname"] for mem in group["members"]]
             }
             for group in data

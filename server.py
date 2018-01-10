@@ -2,7 +2,7 @@ from flask import Flask, request, redirect, url_for, render_template, make_respo
 import requests, json, time, csv, os
 from bot import AnnouncementBot
 from reseed import ContactUpdater
-from loader import ContactLoader
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
@@ -16,17 +16,49 @@ GROUPME_API = "https://api.groupme.com/v3"
 BOT_ID = load_env_var('BOT_ID')
 ACCESS_TOK = load_env_var('ACCESS_TOK')
 APP_REDIRECT = load_env_var('APP_REDIRECT')
+POSTGRES_URL = load_env_var("POSTGRES_URL")
+POSTGRES_USER = load_env_var("POSTGRES_USER")
+POSTGRES_PW = load_env_var("POSTGRES_PW")
+POSTGRES_DB = load_env_var("POSTGRES_DB")
 
-contactLoader = ContactLoader("contacts.csv")
-contacts = contactLoader.load_contacts()
-bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
+DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=POSTGRES_USER,pw=POSTGRES_PW,url=POSTGRES_URL,db=POSTGRES_DB)
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # silence the deprecation warning
+db = SQLAlchemy(app)
+
+from models import Member
+
+try:
+    contacts = Member.query.all()
+except:
+    contacts = []
+
+contact_ids = [c.user_id for c in contacts]
+bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contact_ids)
 updater = ContactUpdater(APP_REDIRECT)
 
-def reload_contacts():
+def update_globals():
     global contacts
-    contacts = contactLoader.load_contacts()
+    contacts = Member.query.all()
     global bot
-    bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
+    contact_ids = [c.user_id for c in contacts]
+    bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contact_ids)
+
+@app.cli.command('resetdb')
+def resetdb_command():
+    """Destroys and creates the database + tables."""
+
+    from sqlalchemy_utils import database_exists, create_database, drop_database
+    if database_exists(DB_URL):
+        print('Deleting database.')
+        drop_database(DB_URL)
+    if not database_exists(DB_URL):
+        print('Creating database.')
+        create_database(DB_URL)
+
+    print('Creating tables.')
+    db.create_all()
+    print('Shiny!')
 
 @app.route("/", methods = ["GET"])
 def index():
@@ -36,8 +68,8 @@ def index():
 def viewContacts():
     contact_string = " "
     for c in contacts:
-        contact_string += (c + "\n")
-    return "Current contact ID's: \n {}".format(contact_string)
+        contact_string += (c.user_id + " ")
+    return "Current contacts: \n {}".format(contact_string)
 
 @app.route("/listen", methods = ["POST"])
 def onMessage():
@@ -64,9 +96,13 @@ def auth_approved():
 def select():
     members = json.loads(request.form["members"])
     try:
-        contactLoader.export_contacts(members)
+        Member.query.delete()
+        for mem in members:
+            mem_rep = Member(mem['user_id'], mem['name'])
+            db.session.add(mem_rep)
+            db.session.commit()
+        update_globals()
         bot.notify_control("The AnnouncementBot contact list has been successfully updated. {} members total.".format(len(members)))
-        reload_contacts()
     except:
         bot.notify_control("WARNING: An error occurred reseeding AnnouncementBot. Please try again.")
 

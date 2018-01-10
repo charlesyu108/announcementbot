@@ -17,7 +17,7 @@
         <h3 style = "text-align:center"> {{ gdata.name }} </h3>
         <form action="{{ url_for('select') }}" method="post">
         <!--  Yes, this is ghetto. -->
-        <input type="text" name="members" value="{{gdata.member_ids_json}}" style="display:none">
+        <input type="text" name="members" value="{{gdata.member_json}}" style="display:none">
         <button type="submit" value="Submit" style="width:25%"> Select </button>
         </form>
       </div>
