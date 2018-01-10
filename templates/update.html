@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <title>AnnouncementBot Update Page</title>
+    <style>
+      body{margin:40px
+      auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;padding:0
+      10px}h1,h2,h3{line-height:1.2}
+    </style>
+  </head>
+  <body>
+    <h2> Select group to reseed AnnouncementBot </h2>
+    {% for gdata in groups %}
+    <div>
+      <hr>
+      <div align="center">
+        <h3 style = "text-align:center"> {{ gdata.name }} </h3>
+        <form action="{{ url_for('select') }}" method="post">
+        <!--  Yes, this is ghetto. -->
+        <input type="text" name="members" value="{{gdata.member_ids_json}}" style="display:none">
+        <button type="submit" value="Submit" style="width:25%"> Select </button>
+        </form>
+      </div>
+      <div>
+        <p> Members ({{gdata.members|count}}) <p>
+        <ul>
+          {% for mem in gdata.members %}
+          <li> {{mem}} </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endfor %}
+  </body>
+</html>

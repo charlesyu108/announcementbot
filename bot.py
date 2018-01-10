@@ -11,6 +11,11 @@ class AnnouncementBot(object):
         self.contacts = contacts
         self.base_guid = base_guid
 
+    def notify_control(self, message):
+        msg = {'bot_id': self.bot_id,'text': message}
+        requests.post(BOT_API, params={'token': self.token}, json = msg)
+
+
     def send_announcement(self, message):
 
         ok_results = err_results = 0
@@ -39,9 +44,4 @@ class AnnouncementBot(object):
         else:
             report += "No errors."
 
-        msg = {
-        	'bot_id': self.bot_id,
-        	'text': report
-        }
-
-        requests.post(BOT_API, params={'token': self.token}, json = msg)
+        self.notify_control(report)

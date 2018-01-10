@@ -13,10 +13,13 @@ class ContactUpdater(object):
     def getGroups(self, auth_tok):
         res = requests.get(GROUPME_API + "/groups", params = {"token":auth_tok})
         data = res.json()["response"]
-        data = [{
-            "name": group["name"],
-            "members":
-                [{"name": mem["nickname"], "user_id": mem["user_id"]} for mem in group["members"]]
-        } for group in data]
-    
+        data = [
+            {
+                "name": group["name"],
+                "member_ids_json": json.dumps([mem["user_id"] for mem in group["members"]]),
+                "members": [mem["nickname"] for mem in group["members"]]
+            }
+            for group in data
+        ]
+
         return data

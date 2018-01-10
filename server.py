@@ -1,19 +1,24 @@
 from flask import Flask, request, redirect, url_for, render_template, make_response
-import requests, json, time
+import requests, json, time, csv, os
 from bot import AnnouncementBot
 from reseed import ContactUpdater
+from loader import ContactLoader
 
 app = Flask(__name__)
 
-BOT_ID = "723d5f0c594795227d2965578c" # Bot ID of whoever is listening in
-ACCESS_TOK = "sWNFUhEiTLajKC9R3rnEblOx13o1yc5anbCqswp3" # BeezleGuy12's access tok
-APP_REDIRECT = 'https://oauth.groupme.com/oauth/authorize?client_id=z5v5YAeP1rVo2pT4b95mEWlfpztGGs3OYfx1V8fjltbmUtvV'
+def load_env_var(var):
+    v = os.environ.get(var, None)
+    if not v:
+        raise ValueError('You must have "{}" variable'.format(var))
+    return v
+
 GROUPME_API = "https://api.groupme.com/v3"
+BOT_ID = load_env_var('BOT_ID')
+ACCESS_TOK = load_env_var('ACCESS_TOK')
+APP_REDIRECT = load_env_var('APP_REDIRECT')
 
-#id":"151279007731713032","name":"Charles Yu","sender_id":"30153727"
-
-contacts = ["30153727"] #just me
-
+contactLoader = ContactLoader("contacts.csv")
+contacts = contactLoader.load_contacts()
 bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
 updater = ContactUpdater(APP_REDIRECT)
 
@@ -22,6 +27,7 @@ def onMessage():
     message = json.loads(request.data)
     if message['sender_type'] != 'bot':
         bot.send_announcement(message)
+
     return "OK"
 
 @app.route("/authenticate", methods = ["GET"])
@@ -34,19 +40,19 @@ def auth_approved():
     if not u_auth_tok:
         return redirect(url_for('authenticate'))
     groups = updater.getGroups(u_auth_tok)
-    resp = make_response(render_template("update.html", groups = groups))
-    resp.set_cookie('groups', json.dumps(groups))
 
-    # TODO cookies have a limit of 2000 figure out what to do...
-    return resp
-    # return render_template("update.html", groups = groups)
-    # return "OK - User authenticated"
+    return render_template("update.html", groups = groups)
 
-@app.route("/group_selected",  methods = ["GET"])
+@app.route("/select_group",  methods = ["POST"])
 def select():
+    members = json.loads(request.form["members"])
+    try:
+        contactLoader.export_contacts(members)
+        bot.notify_control("The AnnouncementBot contact list has been successfully updated. {} members total.".format(len(members)))
+    except:
+        bot.notify_control("WARNING: An error occurred reseeding AnnouncementBot. Please try again.")
 
-    print request.cookies.get("groups"), len(request.cookies.get("groups"))
-    return "OK"
+    return "OK -- Check control group to make sure request went through..."
 
 if __name__ == '__main__':
     app.run(debug=True)
