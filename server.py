@@ -104,7 +104,8 @@ def select():
             db.session.commit()
         update_globals()
         bot.notify_control("The AnnouncementBot contact list has been successfully updated. {} members total.".format(len(members)))
-    except:
+    except Exception as e:
+        print e
         bot.notify_control("WARNING: An error occurred reseeding AnnouncementBot. Please try again.")
 
     return "OK -- Check control group to make sure request went through..."
