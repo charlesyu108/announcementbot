@@ -67,10 +67,11 @@ def index():
 
 @app.route("/contacts", methods = ["GET"])
 def viewContacts():
-    contact_string = " "
-    for c in contacts:
-        contact_string += (c.user_id + " ")
-    return "Current contacts: \n {}".format(contact_string)
+    # contact_string = " "
+    # for c in contacts:
+    #     contact_string += (c.user_id + " ")
+    # return "Current contacts: \n {}".format(contact_string)
+    return render_template("contacts.html", members = contacts)
 
 @app.route("/listen", methods = ["POST"])
 def onMessage():
