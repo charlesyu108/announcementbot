@@ -22,6 +22,10 @@ contacts = contactLoader.load_contacts()
 bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
 updater = ContactUpdater(APP_REDIRECT)
 
+@app.route("/hi", methods = ["GET"])
+def hello():
+    return "Hello"
+
 @app.route("/", methods = ["POST"])
 def onMessage():
     message = json.loads(request.data)
