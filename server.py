@@ -22,6 +22,12 @@ contacts = contactLoader.load_contacts()
 bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
 updater = ContactUpdater(APP_REDIRECT)
 
+def reload_contacts():
+    global contacts
+    contacts = contactLoader.load_contacts()
+    global bot
+    bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contacts)
+
 @app.route("/", methods = ["GET"])
 def index():
     return "AnnouncementBot 2.0"
@@ -55,6 +61,8 @@ def select():
         bot.notify_control("The AnnouncementBot contact list has been successfully updated. {} members total.".format(len(members)))
     except:
         bot.notify_control("WARNING: An error occurred reseeding AnnouncementBot. Please try again.")
+
+    reload_contacts()
 
     return "OK -- Check control group to make sure request went through..."
 
