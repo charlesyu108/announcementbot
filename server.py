@@ -33,7 +33,7 @@ def index():
     return "AnnouncementBot 2.0"
 
 @app.route("/contacts", methods = ["GET"])
-def index():
+def contacts():
     contact_string = reduce(lambda acc,x: acc+"\n"+x, contacts, "")
     return "Current contact ID's: \n {}".format(contact_string)
 
