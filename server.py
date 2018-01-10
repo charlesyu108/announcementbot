@@ -66,10 +66,9 @@ def select():
     try:
         contactLoader.export_contacts(members)
         bot.notify_control("The AnnouncementBot contact list has been successfully updated. {} members total.".format(len(members)))
+        reload_contacts()
     except:
         bot.notify_control("WARNING: An error occurred reseeding AnnouncementBot. Please try again.")
-
-    reload_contacts()
 
     return "OK -- Check control group to make sure request went through..."
 
