@@ -16,12 +16,13 @@ GROUPME_API = "https://api.groupme.com/v3"
 BOT_ID = load_env_var('BOT_ID')
 ACCESS_TOK = load_env_var('ACCESS_TOK')
 APP_REDIRECT = load_env_var('APP_REDIRECT')
-POSTGRES_URL = load_env_var("POSTGRES_URL")
-POSTGRES_USER = load_env_var("POSTGRES_USER")
-POSTGRES_PW = load_env_var("POSTGRES_PW")
-POSTGRES_DB = load_env_var("POSTGRES_DB")
+# POSTGRES_URL = load_env_var("POSTGRES_URL")
+# POSTGRES_USER = load_env_var("POSTGRES_USER")
+# POSTGRES_PW = load_env_var("POSTGRES_PW")
+# POSTGRES_DB = load_env_var("POSTGRES_DB")
 
-DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=POSTGRES_USER,pw=POSTGRES_PW,url=POSTGRES_URL,db=POSTGRES_DB)
+# DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=POSTGRES_USER,pw=POSTGRES_PW,url=POSTGRES_URL,db=POSTGRES_DB)
+DB_URL = load_env_var("DATABASE_URL")
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # silence the deprecation warning
 db = SQLAlchemy(app)
