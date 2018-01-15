@@ -29,6 +29,7 @@ except:
 contact_ids = [c.user_id for c in contacts]
 bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contact_ids)
 updater = ContactUpdater(APP_REDIRECT)
+site_credentials = { 'username': ADMIN_USER, 'password': ADMIN_PASS }
 
 def update_globals():
     global contacts
@@ -58,7 +59,54 @@ def index():
 
 @app.route("/contacts", methods = ["GET"])
 def viewContacts():
-    return render_template("contacts.html", members = contacts)
+    return render_template("contacts.html", members = contacts, editable = False)
+
+@app.route("/contacts/edit", methods = ["GET"])
+@requires_auth(creds = site_credentials )
+def editContacts():
+    return render_template("contacts.html", members = contacts, editable = True)
+
+@app.route("/contacts/add", methods = ["POST"])
+def addContact():
+    try:
+        name = request.form["name"]
+        u_id = request.form["user_id"]
+        member = Member(u_id, name)
+
+        int(u_id) #testing valid u_id
+
+        exists = db.session.query(Member).filter(Member.user_id == u_id).first()
+        if exists:
+            msg = "Error. User ID is already in contacts."
+            return render_template("contacts.html", members = contacts, err_msg = msg, editable = True)
+
+        db.session.add(member)
+        db.session.commit()
+        update_globals()
+        msg = "Successfully added user {}!".format(name)
+        return render_template("contacts.html", members = contacts, msg = msg, editable = True)
+
+    except Exception as e:
+        print e
+        msg = "Something went wrong... Please try again."
+        return render_template("contacts.html", members = contacts, err_msg = msg, editable = True)
+
+@app.route("/contacts/delete", methods = ["POST"])
+def deleteContact():
+    u_id = request.form["user_id"]
+
+    try:
+        member = db.session.query(Member).filter(Member.user_id == u_id).first()
+        db.session.delete(member)
+        db.session.commit()
+        update_globals()
+        msg = "Successfully deleted user with ID {}!".format(u_id)
+        return render_template("contacts.html", members = contacts, msg = msg, editable = True)
+
+    except Exception as e:
+        print e
+        msg = "Something went wrong... Please try again."
+        return render_template("contacts.html", members = contacts, err_msg = msg, editable = True)
 
 @app.route("/listen", methods = ["POST"])
 def onMessage():
@@ -68,7 +116,7 @@ def onMessage():
     return "OK"
 
 @app.route("/reseed", methods = ["GET"])
-@requires_auth(creds = { 'username': ADMIN_USER, 'password': ADMIN_PASS } )
+@requires_auth(creds = site_credentials )
 def auth_reseed():
     return redirect(updater.authenticateUser())
 

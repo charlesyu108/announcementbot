@@ -9,11 +9,57 @@
     </style>
   </head>
   <body>
-    <h2> Current Contacts ({{ members | count }}): </h2>
-        <ul>
-          {% for mem in members %}
-          <li> {{mem.name}} </li>
-          {% endfor %}
-        </ul>
+    <div>
+      <h2> Contacts ({{ members | count }}) </h2>
+
+      {% if err_msg %}
+        <p style = "color:#FE5F55"> {{err_msg}} </p>
+      {% endif %}
+
+      {% if msg %}
+        <p style = "color:#8ACB88"> {{msg}} </p>
+      {% endif %}
+
+      {% if editable %}
+        <p style = "color:#FE5F55"> [ currently in edit mode ]</p>
+
+        <form action="{{ url_for('viewContacts') }}">
+          <input type="submit" value="Exit Edit Mode">
+        </form>
+
+        <hr>
+
+        <form action="{{ url_for('addContact') }}" method="post">
+          <strong> Add User </strong> <br>
+          Name:
+          <input type="text" name="name">
+          <br>
+          User ID:
+          <input type="text" name="user_id">
+          <br>
+          <input type="submit" value="Add">
+        </form>
+
+      {% else %}
+        <form action="{{ url_for('editContacts') }}">
+           <input type="submit" value="Edit">
+         </form>
+
+      {% endif %}
+
+    </div>
+        {% for mem in members %}
+        <div>
+          <hr>
+          <p> <strong>{{mem.name}}</strong> </p>
+          <p> User ID: {{mem.user_id}} </p>
+          {% if editable %}
+          <form action="{{ url_for('deleteContact') }}" method = "post">
+            <input type="text" name="user_id" value="{{mem.user_id}}" style="display:none">
+            <input type="submit" style = "color:#FE5F55" value="Delete">
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
   </body>
 </html>
