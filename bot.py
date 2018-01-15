@@ -6,16 +6,18 @@ BOT_API = "https://api.groupme.com/v3/bots/post"
 class AnnouncementBot(object):
 
     def __init__(self, token, bot_id, contacts, base_guid='announcement-bot'):
-        self.token = token
-        self.bot_id = bot_id
+        self.token = token # User token of account used to send annoucements. NOTE: NOT A GMe bot!
+        self.bot_id = bot_id # Bot_id of bot listening in control group
         self.contacts = contacts
         self.base_guid = base_guid
 
+    """Method notifies the AnnouncementBot control group with provided [message]."""
     def notify_control(self, message):
         msg = {'bot_id': self.bot_id,'text': message}
         requests.post(BOT_API, params={'token': self.token}, json = msg)
 
-
+    """Method notifies each contact in [contacts] of the provided [message] via
+    a GroupMe direct message. Control group is notified with result."""
     def send_announcement(self, message):
 
         ok_results = err_results = 0
