@@ -34,8 +34,8 @@ site_credentials = { 'username': ADMIN_USER, 'password': ADMIN_PASS }
 def update_globals():
     global contacts
     contacts = Member.query.all()
-    global bot
     contact_ids = [c.user_id for c in contacts]
+    global bot
     bot = AnnouncementBot(ACCESS_TOK, BOT_ID, contact_ids)
 
 @app.cli.command('resetdb')
@@ -88,6 +88,7 @@ def addContact():
 
     except Exception as e:
         print e
+        update_globals()
         msg = "Something went wrong... Please try again."
         return render_template("contacts.html", members = contacts, err_msg = msg, editable = True)
 
@@ -105,6 +106,7 @@ def deleteContact():
 
     except Exception as e:
         print e
+        update_globals()
         msg = "Something went wrong... Please try again."
         return render_template("contacts.html", members = contacts, err_msg = msg, editable = True)
 
