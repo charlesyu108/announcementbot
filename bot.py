@@ -35,8 +35,11 @@ class AnnouncementBot(object):
 
             res = requests.post(GROUPME_API + '/direct_messages', params={'token': self.token}, json=msg)
 
-            if res.status_code == 201: ok_results += 1
-            else: err_results += 1
+            if res.status_code == 201:
+                ok_results += 1
+            else:
+                err_results += 1
+                print res.text
 
         # Sending report to control group
         report = "Message succesfully sent to {} recipients. ".format(ok_results)
