@@ -113,7 +113,7 @@ def deleteContact():
 @app.route("/listen", methods = ["POST"])
 def onMessage():
     message = json.loads(request.data)
-    if message['sender_type'] != 'bot':
+    if message['sender_type'] != 'bot' and not message['system']: #ignores system and bot notifications
         bot.send_announcement(message)
     return "OK"
 

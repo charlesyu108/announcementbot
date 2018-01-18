@@ -21,6 +21,7 @@ class AnnouncementBot(object):
     def send_announcement(self, message):
 
         ok_results = err_results = 0
+        errs = []
 
         for contact in self.contacts:
 
@@ -39,6 +40,7 @@ class AnnouncementBot(object):
                 ok_results += 1
             else:
                 err_results += 1
+                errs.append(res.text)
                 print res.text
 
         # Sending report to control group
