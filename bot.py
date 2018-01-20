@@ -42,6 +42,7 @@ class AnnouncementBot(object):
                 err_results += 1
                 errs.append(res.text)
                 print res.text
+            time.sleep(3)
 
         # Sending report to control group
         report = "Message succesfully sent to {} recipients. ".format(ok_results)
