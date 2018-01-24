@@ -21,9 +21,8 @@ class AnnouncementBot(object):
     def send_announcement(self, message):
 
         ok_results = err_results = 0
-        errs = []
 
-        for contact in self.contacts:
+        for idx, contact in enumerate(self.contacts):
 
             # Notifying contacts
             msg = {
@@ -40,9 +39,12 @@ class AnnouncementBot(object):
                 ok_results += 1
             else:
                 err_results += 1
-                errs.append(res.text)
                 print res.text
+
+            # Some jank code to get around rate limit...
             time.sleep(3)
+            if (idx + 1) % 20 == 0:
+                self.notify_control("Attempted to deliver to {} contacts out of {} total. {} errors so far.".format(idx+1, len(self.contacts), err_results))
 
         # Sending report to control group
         report = "Message succesfully sent to {} recipients. ".format(ok_results)
