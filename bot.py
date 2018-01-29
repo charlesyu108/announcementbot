@@ -41,11 +41,6 @@ class AnnouncementBot(object):
                 err_results += 1
                 print res.text
 
-            # Some jank code to get around rate limit...
-            time.sleep(3)
-            if (idx + 1) % 20 == 0:
-                self.notify_control("Attempted to deliver to {} contacts out of {} total. {} errors so far.".format(idx+1, len(self.contacts), err_results))
-
         # Sending report to control group
         report = "Message succesfully sent to {} recipients. ".format(ok_results)
 
